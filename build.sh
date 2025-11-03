@@ -3,4 +3,4 @@ mkdir -p ~/.ssh
 echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
 chmod 600 ~/.ssh/config
 scp -i KUBE-INFRA-KP.pem web/* ubuntu@15.207.89.1:/usr/share/nginx/html/
-ssh -i KUBE-INFRA-KP.pem ubuntu@15.207.89.1'sudo systemctl restart nginx'
+ssh -i KUBE-INFRA-KP.pem ubuntu@15.207.89.1 'sudo systemctl restart nginx'
