@@ -1,0 +1,42 @@
+version: 0.2
+ 
+phases:
+
+  install:
+
+    commands:
+
+      - echo "Installing dependencies..."
+  pre_build:
+
+    commands:
+
+      - echo "Running Pre-build steps..."
+
+      - chmod +x build.sh
+
+ 
+  build:
+
+    commands:
+
+      - echo "Starting Build..."
+      - ./build.sh
+
+ 
+  post_build:
+
+    commands:
+
+      - echo "Build Completed."
+
+
+      - echo "Packaged source code"
+ 
+artifacts:
+
+  files:
+
+    - '**/*'
+
+ 
