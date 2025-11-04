@@ -1,27 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login Page</title>
   <style>
     body {
-      font-family: Arial;
-      background-color: #f4f4f4;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
       text-align: center;
-      margin-top: 100px;
+      margin: 0;
+      padding: 0;
     }
+
     .container {
-      background: rgb(89, 99, 244);
-      padding: 30px;
-      border-radius: 10px;
+      background: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
       display: inline-block;
+      margin-top: 100px;
+      width: 320px;
     }
+
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
     input {
-      margin: 10px;
-      padding: 8px;
-      width: 200px;
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
     }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .checkbox {
+      text-align: left;
+      font-size: 14px;
+      margin: 8px 0;
+    }
+
     button {
-      padding: 8px 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #667eea;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5563d6;
+    }
+
+    .links {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .links a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    .spinner {
+      display: none;
+      margin: 10px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .message {
+      font-size: 14px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -29,36 +119,83 @@
   <div class="container">
     <h2>User Login</h2>
     <form id="loginForm">
-      <input type="text" id="username" placeholder="Username" required><br>
-      <input type="password" id="password" placeholder="Password" required><br>
+      <input type="text" id="username" placeholder="Email or Username" required />
+
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Password" required />
+        <span id="togglePassword" class="toggle-password">👁️</span>
+      </div>
+
+      <div class="checkbox">
+        <label><input type="checkbox" id="rememberMe" /> Remember Me</label>
+      </div>
+
       <button type="submit">Login</button>
+
+      <div class="spinner" id="spinner"></div>
+      <div class="message" id="message"></div>
     </form>
+
+    <div class="links">
+      <a href="ForgotPassword.html">Forgot Password?</a> | 
+      <a href="Register.html">Create Account</a>
+    </div>
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const form = document.getElementById("loginForm");
+    const spinner = document.getElementById("spinner");
+    const message = document.getElementById("message");
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
 
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+    // 👁️ Toggle Password Visibility
+    togglePassword.addEventListener("click", () => {
+      const type =
+        passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      togglePassword.textContent = type === "password" ? "👁️" : "🙈";
+    });
+
+    // 🧠 Handle Login Submit
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      message.textContent = "";
+      spinner.style.display = "block";
+
+      const username = document.getElementById("username").value.trim();
+      const password = passwordInput.value.trim();
+      const remember = document.getElementById("rememberMe").checked;
+
+      if (!username || !password) {
+        spinner.style.display = "none";
+        message.style.color = "red";
+        message.textContent = "Please fill in all fields.";
+        return;
+      }
 
       try {
-        const response = await fetch('/api/login', {  // <-- proxy path
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })  // <-- match backend keys
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, remember }),
         });
 
         const data = await response.json();
+        spinner.style.display = "none";
 
-        if (data.status === 'success') {
-          window.location.href = "Dashboard.html";
+        if (data.status === "success") {
+          message.style.color = "green";
+          message.textContent = "Login successful! Redirecting...";
+          setTimeout(() => (window.location.href = "Dashboard.html"), 1000);
         } else {
-          window.location.href = "Auth_Failure.html";
+          message.style.color = "red";
+          message.textContent = "Invalid username or password.";
         }
-
       } catch (err) {
-        alert('Error connecting to backend');
+        spinner.style.display = "none";
+        message.style.color = "red";
+        message.textContent = "Server error. Please try again later.";
         console.error(err);
       }
     });
